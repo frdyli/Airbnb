@@ -44,10 +44,10 @@ CALENDAR_PATH = os.path.join(DATA_PATH, 'calendar.csv')
 OUTPUT_PATH = '/home/yongjia/airflow/output'
 MODEL_PATH = os.path.join(OUTPUT_PATH, 'models')
 REPORT_PATH = os.path.join(OUTPUT_PATH, 'reports')
-VISUALIZATION_PATH = os.path.join(REPORT_PATH, 'visualizations')
+VISUALIZATION_PATH = os.path.join(OUTPUT_PATH, 'visualizations')
 
 # Create directories if they don't exist
-for path in [OUTPUT_PATH, MODEL_PATH, REPORT_PATH]:
+for path in [OUTPUT_PATH, MODEL_PATH, REPORT_PATH, VISUALIZATION_PATH]:
     if not os.path.exists(path):
         os.makedirs(path)
 
@@ -440,10 +440,6 @@ def exploratory_analysis(**kwargs):
     if 'date' in calendar_df.columns:
         calendar_df['date'] = pd.to_datetime(calendar_df['date'])
     
-    # Create output folder for visualizations
-    viz_path = os.path.join(OUTPUT_PATH, 'visualizations')
-    os.makedirs(viz_path, exist_ok=True)
-    
     # Set plot style
     plt.style.use('seaborn-v0_8-whitegrid')
     sns.set_palette("muted")
@@ -488,7 +484,7 @@ def exploratory_analysis(**kwargs):
         plt.ylabel('Price ($)')
     
     plt.tight_layout()
-    plt.savefig(os.path.join(viz_path, 'price_distribution_analysis.png'))
+    plt.savefig(os.path.join(VISUALIZATION_PATH, 'price_distribution_analysis.png'))
     plt.close()
     
     # Store price statistics in insights
@@ -544,7 +540,7 @@ def exploratory_analysis(**kwargs):
         plt.ylabel('Latitude')
         
         plt.tight_layout()
-        plt.savefig(os.path.join(viz_path, 'geographic_analysis.png'))
+        plt.savefig(os.path.join(VISUALIZATION_PATH, 'geographic_analysis.png'))
         plt.close()
     
     # 3. Neighborhood Analysis
@@ -572,7 +568,7 @@ def exploratory_analysis(**kwargs):
         plt.xlabel('Average Price ($)')
         
         plt.tight_layout()
-        plt.savefig(os.path.join(viz_path, 'neighborhood_analysis.png'))
+        plt.savefig(os.path.join(VISUALIZATION_PATH, 'neighborhood_analysis.png'))
         plt.close()
         
         # Store top neighborhoods by listing count and average price
@@ -627,7 +623,7 @@ def exploratory_analysis(**kwargs):
         plt.ylabel('Price ($)')
     
     plt.tight_layout()
-    plt.savefig(os.path.join(viz_path, 'property_characteristics.png'))
+    plt.savefig(os.path.join(VISUALIZATION_PATH, 'property_characteristics.png'))
     plt.close()
     
     # 5. Amenities Analysis
@@ -674,7 +670,7 @@ def exploratory_analysis(**kwargs):
         plt.title('Top 20 Most Common Amenities')
         plt.xlabel('Count')
         plt.tight_layout()
-        plt.savefig(os.path.join(viz_path, 'amenities_frequency.png'))
+        plt.savefig(os.path.join(VISUALIZATION_PATH, 'amenities_frequency.png'))
         plt.close()
         
         # Price comparison for top amenities
@@ -692,7 +688,7 @@ def exploratory_analysis(**kwargs):
                 plt.xlabel('')
         
         plt.tight_layout()
-        plt.savefig(os.path.join(viz_path, 'amenities_price_impact.png'))
+        plt.savefig(os.path.join(VISUALIZATION_PATH, 'amenities_price_impact.png'))
         plt.close()
         
         # Store amenities analysis in insights
@@ -717,7 +713,7 @@ def exploratory_analysis(**kwargs):
         plt.imshow(wordcloud, interpolation='bilinear')
         plt.axis('off')
         plt.tight_layout()
-        plt.savefig(os.path.join(viz_path, 'amenities_wordcloud.png'))
+        plt.savefig(os.path.join(VISUALIZATION_PATH, 'amenities_wordcloud.png'))
         plt.close()
     
     # 6. Calendar Analysis (Availability and Pricing Over Time)
@@ -770,7 +766,7 @@ def exploratory_analysis(**kwargs):
             plt.xticks(range(1, 13), ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'])
             
             plt.tight_layout()
-            plt.savefig(os.path.join(viz_path, 'calendar_analysis.png'))
+            plt.savefig(os.path.join(VISUALIZATION_PATH, 'calendar_analysis.png'))
             plt.close()
             
             # Store occupancy stats in insights
@@ -798,7 +794,7 @@ def exploratory_analysis(**kwargs):
             plt.ylabel('Availability Rate')
             
             plt.tight_layout()
-            plt.savefig(os.path.join(viz_path, 'weekday_weekend_analysis.png'))
+            plt.savefig(os.path.join(VISUALIZATION_PATH, 'weekday_weekend_analysis.png'))
             plt.close()
     
     # 7. Review Scores Analysis
@@ -851,7 +847,7 @@ def exploratory_analysis(**kwargs):
                 pass
         
         plt.tight_layout()
-        plt.savefig(os.path.join(viz_path, 'review_scores_analysis.png'))
+        plt.savefig(os.path.join(VISUALIZATION_PATH, 'review_scores_analysis.png'))
         plt.close()
     
     # 8. Correlation Analysis
@@ -873,7 +869,7 @@ def exploratory_analysis(**kwargs):
         sns.heatmap(corr_matrix, annot=True, cmap='coolwarm', center=0, fmt='.2f')
         plt.title('Correlation Matrix of Listing Features')
         plt.tight_layout()
-        plt.savefig(os.path.join(viz_path, 'correlation_analysis.png'))
+        plt.savefig(os.path.join(VISUALIZATION_PATH, 'correlation_analysis.png'))
         plt.close()
         
         # Store correlations with price in insights
@@ -887,7 +883,7 @@ def exploratory_analysis(**kwargs):
     return {
         'listings_path': file_paths['listings_path'],
         'calendar_path': file_paths['calendar_path'],
-        'viz_path': viz_path
+        'viz_path': VISUALIZATION_PATH
     }
 
 def feature_engineering(**kwargs):
@@ -1295,6 +1291,9 @@ def train_models(**kwargs):
     
     # Define features for booking probability prediction
     booking_features = [
+        'host_is_superhost', 'security_deposit', 'security_deposit',
+        'is_location_exact', 'host_identity_verified', 'host_response_time',
+        
         # Basic listing attributes
         'price', 'accommodates', 'bedrooms', 'beds', 'bathrooms',
         'minimum_nights', 'maximum_nights', 'is_weekend', 'month',
@@ -2840,7 +2839,7 @@ def generate_report(**kwargs):
 
             .viz-section {{
                 display: grid;
-                grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+                grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
                 gap: 30px;
                 margin: 40px 0;
             }}
@@ -3059,8 +3058,7 @@ def generate_report(**kwargs):
                 position: relative;
             }}
             
-            .viz-card:hover::after {{
-                content: "Click to enlarge";
+            .viz-card:hover::after {{ 
                 position: absolute;
                 bottom: 10px;
                 right: 10px;
@@ -3084,7 +3082,7 @@ def generate_report(**kwargs):
         <div class="decorative-circle circle-1"></div>
         <div class="decorative-circle circle-2"></div>
         <h1>Airbnb Booking Probability & Price Elasticity Report</h1>
-        <p>Generated on: <strong>{current_date}</strong></p>
+        <p>Generated on: <strong>April 19, 2025</strong></p>
     </header>
 
     <div class="container">
@@ -3117,25 +3115,25 @@ def generate_report(**kwargs):
             <div class="viz-section">
                 <div class="viz-card">
                     <h3>Price Distribution</h3>
-                    <img src="visualizations/price_distribution.png" alt="Price Distribution">
+                    <img src="../visualizations/price_distribution_analysis.png" alt="Price Distribution">
                     <p>The distribution of prices across all listings, showing the range and concentration of listing prices.</p>
                 </div>
 
                 <div class="viz-card">
                     <h3>Price Elasticity</h3>
-                    <img src="visualizations/price_elasticity.png" alt="Price Elasticity">
+                    <img src="../elasticity_analysis/visualizations/overall_price_elasticity.png" alt="Price Elasticity">
                     <p>The relationship between price changes and booking probability, showing the overall elasticity curve.</p>
                 </div>
 
                 <div class="viz-card">
                     <h3>Comprehensive Price Elasticity</h3>
-                    <img src="visualizations/price_elasticity_comprehensive.png" alt="Comprehensive Price Elasticity">
+                    <img src="../elasticity_analysis/visualizations/price_elasticity_comprehensive.png" alt="Comprehensive Price Elasticity">
                     <p>A more detailed view of price elasticity accounting for different property characteristics.</p>
                 </div>
 
                 <div class="viz-card">
                     <h3>Price vs Accommodates</h3>
-                    <img src="visualizations/price_vs_accommodates.png" alt="Price vs Accommodates">
+                    <img src="../visualizations/property_characteristics.png" alt="Price vs Accommodates">
                     <p>How listing prices vary based on the number of guests that can be accommodated.</p>
                 </div>
             </div>
@@ -3148,8 +3146,26 @@ def generate_report(**kwargs):
             <div class="viz-section">
                 <div class="viz-card">
                     <h3>Geographic Distribution</h3>
-                    <img src="visualizations/geographic_distribution.png" alt="Geographic Distribution">
+                    <img src="../visualizations/geographic_analysis.png" alt="Geographic Distribution">
                     <p>The spatial distribution of listings, highlighting concentration in different areas.</p>
+                </div>
+                
+                <div class="viz-card">
+                    <h3>Geographic Pricing Clusters</h3>
+                    <img src="../elasticity_analysis/visualizations/geographic_clusters.png" alt="Geographic Pricing Clusters">
+                    <p>Analysis of how different geographical areas form distinct pricing clusters.</p>
+                </div>
+
+                <div class="viz-card">
+                    <h3>Geographic Pricing </h3>
+                    <img src="../elasticity_analysis/visualizations/geographic_pricing.png" alt="Geographic Pricing">
+                    <p>Analysis of booking propability and revenue difference between distinct geographical clusters</p>
+                </div> 
+                
+                <div class="viz-card">
+                    <h3>Neighborhood Analysis</h3>
+                    <img src="../visualizations/neighborhood_analysis.png" alt="Neighborhood Analysis">
+                    <p>Detailed breakdown of how neighborhoods affect pricing and booking probability.</p>
                 </div>
             </div>
         </div>
@@ -3161,13 +3177,13 @@ def generate_report(**kwargs):
             <div class="viz-section">
                 <div class="viz-card">
                     <h3>Room Type Analysis</h3>
-                    <img src="visualizations/room_type_analysis.png" alt="Room Type Analysis">
+                    <img src="../elasticity_analysis/visualizations/room_type_revenue.png" alt="Room Type Analysis">
                     <p>Comparison of booking patterns and prices across different room types.</p>
                 </div>
 
                 <div class="viz-card">
                     <h3>Room Type Elasticity</h3>
-                    <img src="visualizations/room_type_elasticity.png" alt="Room Type Elasticity">
+                    <img src="../elasticity_analysis/visualizations/room_type_elasticity.png" alt="Room Type Elasticity">
                     <p>How price sensitivity varies by room type, showing which categories are most elastic.</p>
                 </div>
             </div>
@@ -3180,20 +3196,20 @@ def generate_report(**kwargs):
             <div class="viz-section">
                 <div class="viz-card">
                     <h3>Monthly Availability</h3>
-                    <img src="visualizations/monthly_availability.png" alt="Monthly Availability">
+                    <img src="../visualizations/calendar_analysis.png" alt="Monthly Availability">
                     <p>How listing availability changes throughout the year, indicating seasonal demand patterns.</p>
                 </div>
 
                 <div class="viz-card">
                     <h3>Seasonal Trends</h3>
-                    <img src="visualizations/seasonal_comprehensive.png" alt="Seasonal Trends Comprehensive">
+                    <img src="../elasticity_analysis/visualizations/seasonal_comprehensive.png" alt="Seasonal Trends Comprehensive">
                     <p>Comprehensive analysis of seasonal booking patterns and price effects.</p>
                 </div>
 
                 <div class="viz-card">
-                    <h3>Seasonal Elasticity</h3>
-                    <img src="visualizations/seasonal_elasticity.png" alt="Seasonal Elasticity">
-                    <p>How price sensitivity varies by season, showing optimal pricing windows.</p>
+                    <h3>Capacity Optimization</h3>
+                    <img src="../elasticity_analysis/visualizations/capacity_comprehensive.png" alt="Capacity Optimization">
+                    <p>Analysis of how capacity management affects seasonal pricing strategy.</p>
                 </div>
             </div>
         </div>
@@ -3205,20 +3221,14 @@ def generate_report(**kwargs):
             <div class="viz-section">
                 <div class="viz-card">
                     <h3>Weekday vs Weekend Price</h3>
-                    <img src="visualizations/weekday_weekend_price.png" alt="Weekday vs Weekend Price">
+                    <img src="../visualizations/weekday_weekend_analysis.png" alt="Weekday vs Weekend Price">
                     <p>Comparison of pricing patterns between weekdays and weekends.</p>
                 </div>
 
                 <div class="viz-card">
                     <h3>Weekday vs Weekend Elasticity</h3>
-                    <img src="visualizations/weekend_weekday_elasticity.png" alt="Weekday vs Weekend Elasticity">
+                    <img src="../elasticity_analysis/visualizations/weekend_weekday_comprehensive.png" alt="Weekday vs Weekend Elasticity">
                     <p>How price sensitivity differs between weekday and weekend bookings.</p>
-                </div>
-
-                <div class="viz-card">
-                    <h3>Weekend-Weekday Comprehensive</h3>
-                    <img src="visualizations/weekend_weekday_comprehensive.png" alt="Weekend-Weekday Comprehensive">
-                    <p>Detailed analysis of the differences in booking patterns between weekdays and weekends.</p>
                 </div>
             </div>
         </div>
@@ -3230,38 +3240,68 @@ def generate_report(**kwargs):
             <div class="viz-section">
                 <div class="viz-card">
                     <h3>Feature Importance: Random Forest</h3>
-                    <img src="visualizations/rf_feature_importance.png" alt="Random Forest Feature Importance">
+                    <img src="../models/rf_feature_importance.png" alt="Random Forest Feature Importance">
                     <p>The most influential features in determining booking probability according to our Random Forest model.</p>
                 </div>
 
                 <div class="viz-card">
-                    <h3>Feature Importance: Baseline Model</h3>
-                    <img src="visualizations/baseline_feature_importance.png" alt="Baseline Feature Importance">
-                    <p>Feature importance from our baseline predictive model for comparison.</p>
+                    <h3>Permutation Importance</h3>
+                    <img src="../models/permutation_importance.png" alt="Permutation Importance">
+                    <p>Feature importance determined through permutation analysis, showing which features have the greatest impact on model predictions.</p>
                 </div>
 
                 <div class="viz-card">
                     <h3>Model Comparison</h3>
-                    <img src="visualizations/model_comparison.png" alt="Model Comparison">
+                    <img src="../models/rfe_cv_scores.png" alt="Model Comparison">
                     <p>Performance comparison of different machine learning models tested.</p>
                 </div>
 
                 <div class="viz-card">
                     <h3>Correlation Matrix</h3>
-                    <img src="visualizations/correlation_matrix.png" alt="Correlation Matrix">
+                    <img src="../visualizations/correlation_analysis.png" alt="Correlation Matrix">
                     <p>Correlation between different listing features, highlighting relationships between variables.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="section" id="recommendations">
+            <h2>Recommendations</h2>
+            <p>Based on our comprehensive analysis, we've developed the following actionable recommendations for Airbnb hosts to optimize their pricing strategy:</p>
+            
+            <div class="viz-section">
+                <div class="viz-card">
+                    <h3>Amenities Impact</h3>
+                    <img src="../visualizations/amenities_price_impact.png" alt="Amenities Impact">
+                    <p>How different amenities affect optimal pricing and booking probability.</p>
+                </div>
+                
+                <div class="viz-card">
+                    <h3>Review Impact</h3>
+                    <img src="../visualizations/review_scores_analysis.png" alt="Review Impact">
+                    <p>The relationship between review scores and price elasticity, showing how hosts can adjust based on their ratings.</p>
+                </div>
+                
+                <div class="viz-card">
+                    <h3>Amenities Frequency</h3>
+                    <img src="../visualizations/amenities_frequency.png" alt="Amenities Frequency">
+                    <p>Distribution of amenities across listings, highlighting opportunities for differentiation.</p>
+                </div>
+                
+                <div class="viz-card">
+                    <h3>Amenities Word Cloud</h3>
+                    <img src="../visualizations/amenities_wordcloud.png" alt="Amenities Word Cloud">
+                    <p>Visual representation of the most common and impactful amenities in the dataset.</p>
                 </div>
             </div>
         </div>
     </div>
 
     <footer>
-        <p>Airbnb Data Analysis | Generated {current_date}</p>
+        <p>Airbnb Data Analysis | Generated April 19, 2025</p>
         <p>This report was automatically generated as part of the Airbnb Price Elasticity Analysis pipeline.</p>
-    </footer>
-
+    </footer> 
     </body>
-    </html>
+    </html> 
     """
     
     # Write HTML report to file
